@@ -1,24 +1,229 @@
+class OperationImpossible(Exception):
+    """
+    Représente une exception d'opération impossible
+    """
+    pass
+
 class Ville:
+    """
+    Represente les villes.
+    """
     def __init__(self, nom : str, population : int):
-        self.__nom = nom
-        self.__population = population
+        """
+        Initialise les champs de la ville.
+        """
+        self._nom = nom
+        self._population = population
         
-    def get_nom(self):
-        return self.__nom
+    @property
+    def nom(self):
+        """
+        Un accesseur du champ nom de la ville.
+        """
+        return self._nom
         
-    def get_population(self):
-        return self.__population
-    
-    def set_nom(self, nom : str):
-        self.__nom = nom
-        
-    def set_population(self, population : int):
-        self.__population = population
+    @property
+    def population(self):
+        """
+        Un accesseur du champ population de la ville.
+        """
+        return self._population
                 
     def __eq__(self, v):
-        return self.__nom == v.get_nom() and self.__population == v.get_population()
+        """
+        Une méthode spécial permettant d'analyser l'égalité entre les deux villes.
+        """
+        return self._nom == v.nom and self._population == v.population
             
     def __str__(self):
-        return "{} ({})".format(self.__nom, self.__population)
-            
-            
+        """
+        Une méthode spécial permettant de décrire de façon informelle la ville.
+        """
+        return "{} ({})".format(self._nom, self._population)
+    
+class Route:
+    """
+    Represente les routes.
+    """
+    
+    def __init__(self, v1 : Ville, v2 : Ville, distance):
+        """
+        Initialise tous les champs qui compose la notion d'une route.
+        """
+        self._v1 = v1
+        self._v2 = v2
+        self._distance = distance
+        
+    @property
+    def v1(self):
+        """
+        Une méthode permettant de retourner la valeur issue de v1.
+        """
+        return self._v1
+    
+    @property
+    def v2(self):
+        """
+        Une méthode permettant de retourner la valeur issue de v2.
+        """
+        return self._v2    
+    
+    @property
+    def distance(self):
+        """
+        Une méthode permettant de retourner la valeur issue de distance qui sépare v1 de v2.
+        """
+        return self._distance
+    
+    def circuit(self):
+        """
+        Une méthode permettant d'affirmer ou non la présence d'un circuit.
+        """
+        return self._v1 == self._v2
+    
+    def __contains__(self, v : Ville):
+        """
+        Une méthode spécial permettant de savoir si la ville v est contenu dans la route issu de self.
+        """
+        return self.v1 == v or self._v2 == v
+    
+    def memes_villes(self, r):
+        """
+        Une méthode permettant de savoir si la route issu de self et la route issu de r contiennent 
+        les mêmes villes.
+        """
+        if self._v1 == r.v1:
+            return self._v2 == r.v2
+        elif self._v1 == r.v2:
+            return self._v2 == r.v1
+        else:
+            return False
+        
+    def suit(self, r):
+        """
+        Une méthode permettant de savoir s'il existe une suite entre les deux routes.
+        """
+        return self._v1 in r or self._v2 in r
+    
+    def __eq__(self, r):
+        """
+        Une méthode permettant de savoir si la route issu de self et la route issu de r contiennent 
+        les mêmes villes et ont la même distance.
+        """
+        return self.memes_villes(r) and self._distance == r.distance
+    
+    def __lt__(self, r): 
+        """
+        Une méthode permettant de savoir si la route issu de self et la route issu de r contiennent 
+        les mêmes villes et que la distance appartenant à self est strictement plus petite que celle de r.
+        """
+        return self.memes_villes(r) and self._distance < r.distance
+    
+    def __str__(self):
+        """
+        Une méthode spécial permettant d'afficher une chaine qui décrit la route courante.
+        """
+        return "{} - {} : {}".format(self._v1, self._v2, self._distance)
+    
+    def __add__(self, r):
+        """
+        Une méthode spécial permettant de réaliser l'action d'ajoute de deux routes. Deux cas sont identifiés :
+        La première est il faut qu'une ville issue de self soit contenue dans r
+        La seconde est représenté par le fait qu'il s'agit de la même route
+        """
+        if self.memes_villes(r):
+            return self(self._v1, self._v1, self._distance)
+        elif self._v1 in r:
+            if self._v1 != r.v1:
+                return self(self._v1, r.v1, self._distance + r.distance)
+            else:
+                return self(self._v1, r.v2, self._distance + r.distance)
+        elif self._v2 in r:
+            if self._v2 != r.v1:
+                return self(self._v2, r.v1, self._distance + r.distance)
+            else:
+                return self(self._v2, r.v2, self._distance + r.distance)
+        else:
+            raise OperationImpossible()
+        
+class Reseau:
+    """
+    Represente les réseaux routiers.
+    """
+    
+    def __init__(self):
+        """
+        Initialise les champs routier. Par défaut il n'existe pas de routes donc la liste est vide.
+        """
+        self._routes = list()
+    
+    @property
+    def routes(self):
+        """
+        Retourne la liste des routes existant dans le réseau routier.
+        """
+        return self._routes
+    
+    def __getitem__(self, i : int):
+        """
+        Permet de retourner la ième route parmi la liste des routes.
+        """
+        if i < 0 or i >= len(self._routes):
+            raise IndexError
+        else:
+            return self._routes[i]
+        
+    def __len__(self):
+        """
+        Retourne le nombre de routes du réseau.
+        """
+        return len(self._routes)
+    
+    def __iter__(self):
+        """
+        Retourne l'itérateur associé à la liste des routes qui se trouve dans le réseau.
+        """
+        return iter(self._routes)
+    
+    def __contains__(self, r : Route):
+        """
+        Vérifie la présence de la route r dans le réseau routier.
+        """
+        for rt in self._routes:
+            if r == rt:
+                return True 
+        return False
+    
+    def ajoute(self, r : Route): 
+        """
+        Permet l'ajout d'une route dans le réseau routier.
+        """
+        self._routes.append(r)
+        return self
+    
+    def __iadd__(self, res):
+        """
+        Permet l'ajout de toutes les routes issu de res dans le réseau routier appartenant à self.
+        """
+        for r in res: 
+            self.ajoute(r)
+    
+    def __str__(self):
+        """
+        Permet l'affichage de toutes les routes se trouvant dans le réseau routier issu de self.
+        """
+        for r in self._routes:
+            r.__str__()
+            print("\n")
+    
+    def bonne_route(self, r : Route):
+        """
+        Permet de vérifier si r est une bonne route.
+        """
+        if not r.circuit():
+            for rt in self._routes:
+                if rt < r: 
+                    return False
+            return True
+        else:
+            return False
