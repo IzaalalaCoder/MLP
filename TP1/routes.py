@@ -132,17 +132,17 @@ class Route:
         La seconde est représenté par le fait qu'il s'agit de la même route
         """
         if self.memes_villes(r):
-            return self(self._v1, self._v1, self._distance)
+            return Route(self._v1, self._v1, self._distance)
         elif self._v1 in r:
             if self._v1 != r.v1:
-                return self(self._v1, r.v1, self._distance + r.distance)
+                return Route(self._v2, r.v1, self._distance + r.distance)
             else:
-                return self(self._v1, r.v2, self._distance + r.distance)
+                return Route(self._v2, r.v2, self._distance + r.distance)
         elif self._v2 in r:
             if self._v2 != r.v1:
-                return self(self._v2, r.v1, self._distance + r.distance)
+                return Route(self._v1, r.v1, self._distance + r.distance)
             else:
-                return self(self._v2, r.v2, self._distance + r.distance)
+                return Route(self._v1, r.v2, self._distance + r.distance)
         else:
             raise OperationImpossible()
         
@@ -227,3 +227,17 @@ class Reseau:
             return True
         else:
             return False
+        
+    def bonnes_routes(self):
+        res = Reseau()
+        for r in self._routes:
+            if self.bonne_route(r) and not (r in res):
+                res.ajoute(r)
+        return res
+    
+    def __or__(self, res):
+        b_res = res.bonnes_routes()
+        b_res += self.bonnes_routes() 
+        return b_res
+    
+    
