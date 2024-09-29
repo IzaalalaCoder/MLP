@@ -33,4 +33,6 @@ reseau.ajoute(Route(montpellier, poitiers, 557))
 reseau.ajoute(Route(poitiers, bordeaux, 237))
 reseau.ajoute(Route(bordeaux, nantes, 334))
 
+res = reseau.meilleurs_routes()
+print(len(res))
 print(reseau.meilleurs_routes())

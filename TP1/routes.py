@@ -207,14 +207,17 @@ class Reseau:
         """
         for r in res: 
             self.ajoute(r)
+        return self
     
     def __str__(self):
         """
         Permet l'affichage de toutes les routes se trouvant dans le réseau routier issu de self.
         """
+        string = ""
         for r in self._routes:
-            r.__str__()
-            print("\n")
+            string += r.__str__() + "\n"
+        
+        return string
     
     def bonne_route(self, r : Route):
         """
@@ -259,5 +262,50 @@ class Reseau:
         
         return reseau.bonnes_routes()
 
-    # def meilleurs_routes3(self):
-    # def meilleurs_routes(self):
+    def meilleurs_routes3(self):
+        """
+        Permet de créer un réseau ne contenant uniquement des routes combiné jusqu'à trois fois et qui sont de bonnes routes.
+        """
+        res = Reseau()
+        res += self
+
+        for r1 in self._routes:
+            for r2 in self._routes:
+                try:
+                    route = r1 + r2
+                    if res.bonne_route(route):
+                        res.ajoute(route)
+                except OperationImpossible:
+                    continue
+
+        for r1 in self._routes:
+            for r2 in self._routes:
+                for r3 in self._routes:
+                    try:
+                        route = (r1 + r2) + r3
+                        if res.bonne_route(route):
+                            res.ajoute(route)
+                    except OperationImpossible:
+                        continue
+        
+        return res.bonnes_routes()
+
+    def meilleurs_routes(self):
+        """
+        Retourne le réseau des routes les plus courtes possibles en traversant autant de routes que désiré.
+        """
+        res = Reseau()
+        res += self
+        taille_initiale = 0
+
+        while taille_initiale != len(res.routes):
+            taille_initiale = len(res.routes)
+            for r1 in res.routes:
+                for r2 in self.routes:
+                    try:
+                        route = r1 + r2
+                        if res.bonne_route(route) and route not in res:
+                            res.ajoute(route)
+                    except OperationImpossible:
+                        continue
+        return res.bonnes_routes()
