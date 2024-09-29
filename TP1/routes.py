@@ -229,6 +229,9 @@ class Reseau:
             return False
         
     def bonnes_routes(self):
+        """
+        Permet de créer un réseau ne contenant uniquement de bonnes routes.
+        """
         res = Reseau()
         for r in self._routes:
             if self.bonne_route(r) and not (r in res):
@@ -236,8 +239,22 @@ class Reseau:
         return res
     
     def __or__(self, res):
-        b_res = res.bonnes_routes()
-        b_res += self.bonnes_routes() 
-        return b_res
-    
-    
+        """
+        Permet de créer un réseau ne contenant uniquement de bonnes routes issus de self ou de res.
+        """
+        reseau = Reseau()
+        reseau += res
+        reseau += self
+        return reseau.bonnes_routes()
+
+    def __mul__(self, res):
+        """
+        Permet de créer un réseau ne contenant uniquement de bonnes routes issu de la multiplication des routes issus de self et de res.
+        """
+        reseau = Reseau()
+
+        for i in self._routes:
+            for j in res.routes:
+                reseau.ajoute(i + j)
+        
+        return reseau.bonnes_routes()
