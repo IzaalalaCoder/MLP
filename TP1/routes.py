@@ -258,3 +258,6 @@ class Reseau:
                 reseau.ajoute(i + j)
         
         return reseau.bonnes_routes()
+
+    # def meilleurs_routes3(self):
+    # def meilleurs_routes(self):
